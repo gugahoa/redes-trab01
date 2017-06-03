@@ -2,11 +2,6 @@
 #include <arpa/inet.h>
 #include <string.h>
 #include <stdio.h>
-#include <sys/types.h>
-#include <netdb.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <errno.h>
 
 int create_socket(uint64_t port) {
 	// Socket file descripton
