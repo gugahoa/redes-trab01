@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <netdb.h>
-#include <pthread.h>
 
 // References:
 // https://www.gnu.org/software/libc/manual/html_node/Byte-Stream-Example.html#Byte-Stream-Example
@@ -83,11 +82,12 @@ void* helper(void *vargp) {
 	return NULL;
 }
 
-void send_random_interval(int socket, uint32_t interval) {
+pthread_t send_random_interval(int socket, uint32_t interval) {
 	uint64_t thread_arg = (uint64_t)interval;
 	uint64_t shifted_socket = (uint64_t)socket << 32;
 	thread_arg += shifted_socket;
 
 	pthread_t tid;
 	pthread_create(&tid, NULL, helper, (void*)thread_arg);
+	return tid;
 }
