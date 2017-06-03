@@ -4,7 +4,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include "server.h"
+#include "server/server.h"
 
 int main() {
 	printf("Hello, world!\n");
