@@ -6,6 +6,7 @@
 
 int connect_host(const char*, uint16_t);
 int send_msg(int, const char*, size_t);
-void send_random(int);
+int send_random(int);
+void send_random_interval(int, uint32_t);
 
 #endif
