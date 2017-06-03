@@ -5,6 +5,11 @@
 #include <netdb.h>
 #include <pthread.h>
 
+// References:
+// https://www.gnu.org/software/libc/manual/html_node/Byte-Stream-Example.html#Byte-Stream-Example
+// http://pubs.opengroup.org/onlinepubs/009695399/basedefs/pthread.h.html
+// http://www.geeksforgeeks.org/multithreading-c-2/
+
 int populate_sockaddr(struct sockaddr_in* name, const char* host, uint16_t port) {
 	struct hostent *hostinfo;
 
