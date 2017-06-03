@@ -44,6 +44,7 @@ int connect_host(const char* addr, uint16_t port)  {
 }
 
 int send_msg(int socket, const char* msg, size_t size) {
+	// prevent overflows: choose the min between size and strlen
 	size_t n = strlen(msg) > size ? size : strlen(msg);
 
 	if (write(socket, msg, n + 1) < 0) {
@@ -60,18 +61,19 @@ int send_random(int socket) {
 	return send_msg(socket, buffer, strlen(buffer));
 }
 
-// TODO: change send_msg to send_random
 void* helper(void *vargp) {
+	// Undo the bit shifting we did before creating the thread
 	uint64_t socket = (uint64_t)vargp >> 32;
 	uint64_t interval = ((uint64_t)vargp << 32) >> 32;
 	char buffer[128];
 
 	struct timespec req;
 	req.tv_sec = 0;
-	req.tv_nsec = interval;
+	req.tv_nsec = interval; // 1 second == 1 billion nano seconds
 
 	while (1) {
 		sprintf(buffer, "socket = %d interval = %d", socket, interval);
+		// TODO: change send_msg to send_random
 		if (send_msg(socket, buffer, strlen(buffer)) < 0) {
 			return NULL;
 		}
@@ -83,8 +85,11 @@ void* helper(void *vargp) {
 }
 
 pthread_t send_random_interval(int socket, uint32_t interval) {
-	uint64_t thread_arg = (uint64_t)interval;
-	uint64_t shifted_socket = (uint64_t)socket << 32;
+	// I don't know how to send more than one arg to the thread, so...
+	uint64_t thread_arg = (uint64_t)interval; // The first 32 bits is the interval
+	uint64_t shifted_socket = (uint64_t)socket << 32; // The last 32 bits is the socket descriptor
+
+	// Problems: int (socket) is not always 32bits, we may lose information
 	thread_arg += shifted_socket;
 
 	pthread_t tid;
