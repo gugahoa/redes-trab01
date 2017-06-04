@@ -62,13 +62,13 @@ int listen_and_serve(int socket_fd)
                         return -1;
                 }
 
-                for (int i = 0; i < FD_SETSIZE; ++i) {
-                        if (!FD_ISSET(i, &read_set)) {
+                for (int isocket = 0; isocket < FD_SETSIZE; isocket++) {
+                        if (!FD_ISSET(isocket, &read_set)) {
                                 continue;
                         }
 
                         // New connection
-                        if (i == socket_fd) {
+                        if (isocket == socket_fd) {
                                 client_name_size = sizeof(client_name);
 
                                 // http://pubs.opengroup.org/onlinepubs/7908799/xns/accept.html
@@ -92,29 +92,24 @@ int listen_and_serve(int socket_fd)
                                 ssize_t nbytes;
 
                                 // http://pubs.opengroup.org/onlinepubs/7908799/xns/recv.html
-                                nbytes = recv(i, buffer, 255, 0);
+                                nbytes = recv(isocket, buffer, 255, 0);
 
                                 if (nbytes > 0) {                               // Read success
                                         buffer[nbytes - 1] = '\0';
-                                        printf("      Message of size %ld (%s on %hu, fifo %d): \"%s\".\n",
-                                                        nbytes, inet_ntoa(client_name.sin_addr),
-                                                        ntohs(client_name.sin_port), i, buffer);
+                                        printf("      Message of size %ld (socket fifo %d): \"%s\".\n",
+                                                        nbytes, isocket, buffer);
 
                                         // Stop listening altogether
                                         if (strncmp(buffer, "close", 5) == 0)
                                                 return 0;
 
                                 } else if (nbytes < 0) {                        // Read failure
-                                        printf("      Error receiving message: %s on %hu, fifo %d.\n",
-                                                        inet_ntoa(client_name.sin_addr),
-                                                        ntohs(client_name.sin_port), i);
+                                        printf("      Error receiving message: fifo %d.\n", isocket);
 
                                 } else {                                        // Connection closed
-                                        close(i);
-                                        FD_CLR(i, &active_set);
-                                        printf("    Connection closed: %s on %hu, fifo %d.\n",
-                                                        inet_ntoa(client_name.sin_addr),
-                                                        ntohs(client_name.sin_port), i);
+                                        close(isocket);
+                                        FD_CLR(isocket, &active_set);
+                                        printf("    Connection closed: fifo %d.\n", isocket);
 
                                 }
                         }

@@ -1,8 +1,9 @@
 #include "client.h"
 
 #include <stdio.h>
-#include <stdlib.h>
+#include <string.h>
 #include <arpa/inet.h>
+#include <pthread.h>
 #include <unistd.h>
 #include <netdb.h>
 
@@ -23,15 +24,15 @@ int connect_host(const char* host_addr, uint16_t port)
         // Find hostname
         printf("  Engaging host %s... ", host_addr);
 
-        struct hostent *host_info;      // TODO comment your variables
-        struct sockaddr_in host_name;   // TODO comment your variables
-
+        struct hostent *host_info;      // Host name store struct
         host_info = gethostbyname(host_addr);
+
         if (host_info == NULL) {
                 printf("Unkown host %s\n.", host_addr);
                 return -1;
         }
 
+        struct sockaddr_in host_name;   // Host name full info struct
         host_name.sin_family = AF_INET;
         host_name.sin_port = htons(port);
         host_name.sin_addr = *(struct in_addr*) host_info->h_addr;
@@ -65,11 +66,11 @@ int send_msg(int socket, const char* msg, size_t size)
         return 0;
 }
 
-void* dummy_msg_sender_func(void *tdata)
+void* dummy_sender_func(void *tdata)
 {
         tdata_t *data = (tdata_t *)tdata;
 
-        struct timespec req;            // TODO comment your variables
+        struct timespec req;            // Thread time requirement
         req.tv_sec = 0;                 // No full second, only fractions
         req.tv_nsec = data->interval;   // 1 second == 1 billion nano seconds
         size_t nsends = data->nsends;   // Send this amount of messages
@@ -78,30 +79,15 @@ void* dummy_msg_sender_func(void *tdata)
                 char buffer[128];
                 sprintf(buffer, "%d", rand());
 
-                if (send_msg(data->socket, buffer, strlen(buffer)) < 0)
-                        return NULL;
+                if (send_msg(data->socket, buffer, strlen(buffer)) < 0) {
+                        printf("      Fatal error on worker: can't write to fifo %d.\n",
+                                        data->socket);
+                        pthread_exit(tdata);
+                }
 
                 nanosleep(&req, NULL);
                 nsends--;
         }
 
         pthread_exit(tdata);
-}
-
-pthread_t dummy_msg_sender(int socket, size_t nsends, uint64_t interval)
-{
-        // assemble thread data
-        tdata_t *data = malloc(sizeof(*data));  // Data to be used by worker bread
-        data->socket = socket;
-        data->nsends = nsends;
-        data->interval = interval;
-
-        // create worker thread
-        pthread_t tid;                          // Generate unique thread identifier
-        pthread_create(&tid, NULL, dummy_msg_sender_func, (void*)data);
-
-        // TODO Deallocate thread data. Ideally, inline this function.
-
-        // return identifier
-        return tid;
 }
