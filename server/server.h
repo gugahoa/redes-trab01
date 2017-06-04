@@ -1,7 +1,6 @@
-#ifndef __SERVER_H__
-#define __SERVER_H__
+#pragma once
+
+#include <stdint.h>
 
 int create_socket(uint64_t);
 int listen_and_serve(uint64_t);
-
-#endif

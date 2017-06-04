@@ -1,13 +1,18 @@
-#ifndef __CLIENT_H__
-#define __CLIENT_H__
+#pragma once
 
 #include <string.h>
 #include <stdint.h>
 #include <pthread.h>
 
-int connect_host(const char*, uint16_t);
-int send_msg(int, const char*, size_t);
-int send_random(int);
-pthread_t send_random_interval(int, uint32_t);
+typedef struct TDATA_T {
 
-#endif
+        int      socket;
+        size_t   nsends;
+        uint64_t interval;
+
+} tdata_t;
+
+int connect_host(const char* host_addr, uint16_t port);
+int send_msg(int socket, const char* msg, size_t size);
+
+pthread_t dummy_msg_sender(int socket, size_t nsends, uint64_t interval);
