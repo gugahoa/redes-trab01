@@ -1,3 +1,5 @@
+#include "server.h"
+
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <string.h>
@@ -35,7 +37,7 @@ int create_socket(uint64_t port)
         return sock;
 }
 
-int listen_and_serve(int socket_fd)
+int listen_and_serve(uint64_t socket_fd)
 {
         // http://pubs.opengroup.org/onlinepubs/7908799/xns/listen.html
         if (listen(socket_fd, 12) < 0) {
@@ -54,7 +56,9 @@ int listen_and_serve(int socket_fd)
 
         printf("  Server socket: Waiting for connections...\n");
 
-        while (1) {
+        // TODO HERE
+
+        while (running) {
                 read_set = active_set;
                 // http://pubs.opengroup.org/onlinepubs/007908799/xsh/select.html
                 if (select(FD_SETSIZE, &read_set, NULL, NULL, NULL) < 0) {
@@ -115,4 +119,6 @@ int listen_and_serve(int socket_fd)
                         }
                 }
         }
+
+        return 0;
 }
