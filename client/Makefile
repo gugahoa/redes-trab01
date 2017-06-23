@@ -1,7 +1,11 @@
-all:
-	gcc -Wall -O2 -lpthread client.* main.c -o client
+CC = gcc
+EXE = client
+CFLAGS = -O3 -Wall -lncurses -lpthread
+
+all: *.c *.h
+	$(CC) $^ -o $(EXE) $(CFLAGS)
 
 .PHONY: clean
 
 clean:
-	rm -f client
+	rm -f $(EXE)

@@ -1,7 +1,11 @@
-all:
-	gcc -Wall -O2 server.* main.c -o server
+CC = gcc
+EXE = server
+CFLAGS = -O3 -Wall -lncurses -lpthread
+
+all: *.c *.h
+	$(CC) $^ -o $(EXE) $(CFLAGS)
 
 .PHONY: clean
 
 clean:
-	rm -f server
+	rm -f $(EXE)

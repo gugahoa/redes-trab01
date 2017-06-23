@@ -1,8 +1,8 @@
 all:
 	$(MAKE) -C server all
 	$(MAKE) -C client all
-	ln -s server/server Server
-	ln -s client/client Client
+	ln -fs server/server Server
+	ln -fs client/client Client
 
 .PHONY: clean
 

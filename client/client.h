@@ -1,21 +1,29 @@
 #pragma once
 
 #include <stdlib.h>
-#include <stdint.h>
+#include <ncurses.h>
 
 typedef struct TDATA_T {
 
-        int      socket;
-        int      nsends;
-        uint64_t interval;
+    int      my_id;
+    int      sock_fd;
+    long     interval;
 
 } tdata_t;
 
+pthread_mutex_t printlock;
+
+// Thread error flgs
+extern char cl_err[3];
+
+// Main window handle
+extern WINDOW *whandle;
+
+// Sensor window handles
+extern WINDOW *vshandle[3];
+
 // Connect to host of name 'host_addr' through port 'port'
-int connect_host(const char* host_addr, uint16_t port);
+int cl_connect_to_host(const char* host_addr, int port);
 
-// Send message 'msg' of size 'size' through socket 'socket'
-int send_msg(int socket, const char* msg, size_t size);
-
-// Gibberish messsage sender function for the sensor emulator threads
-void *dummy_sender_func(void *tdata);
+// Gibberish messsage sender function for sensor emulation
+void *cl_generate_and_send(void *tdata);
